@@ -5,12 +5,13 @@ import './index.css';
 
 const rootElement = document.getElementById('root')!;
 
-// Use a property on the element to store the root to prevent multiple createRoot calls
-if (!(rootElement as any)._reactRoot) {
-  (rootElement as any)._reactRoot = createRoot(rootElement);
-}
+// Use a property on the element to store the root instance
+let root = (rootElement as any)._reactRoot;
 
-const root = (rootElement as any)._reactRoot;
+if (!root) {
+  root = createRoot(rootElement);
+  (rootElement as any)._reactRoot = root;
+}
 
 root.render(
   <StrictMode>

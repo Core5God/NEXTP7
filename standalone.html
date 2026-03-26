@@ -238,8 +238,23 @@
             );
         }
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
+        const rootElement = document.getElementById('root');
+        
+        // Use a property on the element to store the root instance
+        let root = rootElement._reactRoot;
+
+        if (!root) {
+            try {
+                root = createRoot(rootElement);
+                rootElement._reactRoot = root;
+            } catch (e) {
+                console.warn('Failed to create React root in standalone mode:', e);
+            }
+        }
+
+        if (root) {
+            root.render(React.createElement(App));
+        }
     </script>
 </body>
 </html>

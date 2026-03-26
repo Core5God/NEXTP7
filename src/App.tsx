@@ -53,16 +53,6 @@ const PROLOGUE_IMAGES = [
  */
 function Background() {
   const scroll = useScroll();
-  const points = useMemo(() => {
-    const p = new Float32Array(3000 * 3);
-    for (let i = 0; i < 3000; i++) {
-      p[i * 3] = (Math.random() - 0.5) * 60;
-      p[i * 3 + 1] = (Math.random() - 0.5) * 60;
-      p[i * 3 + 2] = (Math.random() - 0.5) * 60;
-    }
-    return p;
-  }, []);
-
   const gridRef = useRef<THREE.GridHelper>(null);
 
   useLayoutEffect(() => {
@@ -81,16 +71,6 @@ function Background() {
 
   return (
     <group>
-      <Points positions={points} stride={3} frustumCulled={false}>
-        <PointMaterial
-          transparent
-          color={THEME.primary}
-          size={0.03}
-          sizeAttenuation={true}
-          depthWrite={false}
-          opacity={0.15}
-        />
-      </Points>
       <gridHelper ref={gridRef} args={[120, 60, 0x333333, 0x111111]} position={[0, -6, 0]} />
       <fog attach="fog" args={[THEME.bg, 5, 45]} />
     </group>
@@ -138,7 +118,7 @@ function Scene() {
 
 // --- UI Components ---
 
-function HUD({ prologueState, activeIndex, onReturn }: { prologueState: PrologueState, activeIndex: number, onReturn: () => void }) {
+function HUD({ prologueState, activeIndex, onReturn, onScrollTo }: { prologueState: PrologueState, activeIndex: number, onReturn: () => void, onScrollTo: (index: number) => void }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isPrologue = prologueState === 'active' || prologueState === 'video';
   const mainColor = "#A40000";
@@ -274,46 +254,49 @@ function HUD({ prologueState, activeIndex, onReturn }: { prologueState: Prologue
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/95 pointer-events-auto flex items-center justify-center z-[60]"
+            className="fixed inset-0 bg-black pointer-events-auto flex items-center justify-center z-[60]"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 p-12 max-w-6xl w-full">
-              <div className="flex flex-col gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-[1.4fr_0.6fr] gap-12 md:gap-16 p-12 max-w-7xl w-full">
+              <div className="flex flex-col gap-12 md:-ml-20">
                 {[
-                  { en: "Intelligence", cn: "智能" },
-                  { en: "Performance", cn: "性能" },
-                  { en: "Future", cn: "未来" },
-                  { en: "Experience", cn: "体验" }
+                  { en: "IMAGINATION", cn: "想象力", index: 1 },
+                  { en: "INTELLIGENCE", cn: "智能", index: 2 },
+                  { en: "FUTURE", cn: "未来", index: 3 }
                 ].map((item, i) => (
-                  <motion.a
+                  <motion.div
                     key={item.en}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    href="#"
-                    className="flex flex-col group"
+                    onClick={() => {
+                      onScrollTo(item.index);
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex flex-col group cursor-pointer"
                   >
-                    <span className="text-6xl md:text-8xl font-black uppercase tracking-tighter group-hover:text-cyan-400 transition-all duration-500 group-hover:translate-x-4">
+                    <span className="text-5xl md:text-7xl font-bold uppercase tracking-tighter group-hover:text-cyan-400 transition-all duration-500 group-hover:translate-x-4">
                       {item.en}
                     </span>
                     <span className="text-sm font-bold tracking-[0.5em] text-white/20 group-hover:text-cyan-400/50 transition-all ml-2">
                       {item.cn}
                     </span>
-                  </motion.a>
+                  </motion.div>
                 ))}
               </div>
-              <div className="hidden md:flex flex-col justify-center gap-8 border-l border-white/10 pl-24">
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs text-cyan-400 font-bold tracking-[0.4em] uppercase">愿景</span>
-                  <p className="text-white/40 text-sm leading-relaxed max-w-xs">
-                    通过人工智能和可持续能源，构建人类移动的未来。
+              <div className="hidden md:flex flex-col justify-center gap-12 border-l border-white/10 pl-20">
+                <div className="flex flex-col gap-4">
+                  <span className="text-xs text-cyan-400 font-bold tracking-[0.4em] uppercase">项目概述</span>
+                  <p className="text-white/40 text-sm leading-relaxed max-w-md">
+                    从想象力到智能判断，再到未来形态的预演，<br />
+                    我们试图用一套连续的体验叙事，呈现小鹏对于下一代出行的思考。
                   </p>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-4">
                   <span className="text-xs text-cyan-400 font-bold tracking-[0.4em] uppercase">联系我们</span>
-                  <p className="text-white/40 text-sm leading-relaxed">
-                    press@xpeng.com<br />
-                    investor@xpeng.com
-                  </p>
+                  <div className="flex flex-col gap-2 text-white/40 text-sm leading-relaxed">
+                    <p>WeChat：wycz-ppll</p>
+                    <p>Lark：huangpl2@xiaopeng.com</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -330,24 +313,45 @@ function HUD({ prologueState, activeIndex, onReturn }: { prologueState: Prologue
   );
 }
 
-function SectionContent({ title, subtitle, description, index, children }: { title: string, subtitle: string, description: string, index: number, children?: React.ReactNode }) {
+function SectionContent({ title, subtitle, description, index, children, rightContent }: { title: string, subtitle: string, description: string, index: number, children?: React.ReactNode, rightContent?: React.ReactNode }) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
+        staggerChildren: 0.3,
+        delayChildren: 0.4,
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 40, filter: "blur(15px)" },
+    hidden: { opacity: 0, y: 20, filter: "blur(10px)" },
     visible: { 
       opacity: 1, 
       y: 0, 
       filter: "blur(0px)",
+      transition: { duration: 1, ease: [0.22, 1, 0.36, 1] }
+    }
+  } as const;
+
+  const titleVariants = {
+    hidden: { y: "120%", opacity: 0, skewY: 7 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      skewY: 0,
+      transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] }
+    }
+  } as const;
+
+  const subtitleVariants = {
+    hidden: { opacity: 0, x: -40, filter: "blur(20px)", scale: 0.98 },
+    visible: { 
+      opacity: 1, 
+      x: 0, 
+      filter: "blur(0px)",
+      scale: 1,
       transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] }
     }
   } as const;
@@ -369,16 +373,18 @@ function SectionContent({ title, subtitle, description, index, children }: { tit
           <div className="w-12 h-[1px]" style={{ backgroundColor: THEME.primary, opacity: 0.4 }} />
         </motion.div>
         
-        {/* Main Title */}
-        <motion.h2 
-          variants={itemVariants}
-          className="text-4xl md:text-6xl lg:text-7xl font-black tracking-[-0.03em] uppercase mb-10 leading-[1.15] text-white max-w-4xl"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
+        {/* Main Title - Mask Reveal Effect */}
+        <div className="overflow-hidden mb-10">
+          <motion.h2 
+            variants={titleVariants}
+            className="text-4xl md:text-6xl lg:text-7xl font-black tracking-[-0.03em] uppercase leading-[1.15] text-white max-w-4xl"
+            dangerouslySetInnerHTML={{ __html: title }}
+          />
+        </div>
         
-        {/* Subtitle / Explanatory Layer */}
+        {/* Subtitle / Explanatory Layer - Slide & Blur Effect */}
         <motion.div 
-          variants={itemVariants}
+          variants={subtitleVariants}
           className="flex flex-col gap-24 max-w-xl"
         >
           <p className="text-xs md:text-sm text-white/40 font-light leading-[2.2] tracking-[0.25em]">
@@ -408,6 +414,8 @@ function SectionContent({ title, subtitle, description, index, children }: { tit
         </motion.div>
       </motion.div>
 
+      {rightContent}
+
       {/* Subtle Background Accent - Non-3D */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/2 h-1/2 bg-gradient-to-l from-red-900/5 to-transparent blur-3xl pointer-events-none" />
       
@@ -421,10 +429,117 @@ function SectionContent({ title, subtitle, description, index, children }: { tit
   );
 }
 
+// --- Chapter 1 Specific Components ---
+
+const CAR_COLORS = [
+  { name: "星曜红", color: "#A40000", img: "https://i.postimg.cc/pL2f5DfZ/hong.png" },
+  { name: "星云白", color: "#F5F5F5", img: "https://i.postimg.cc/qvks68sc/bai.png" },
+  { name: "暗夜黑", color: "#1A1A1A", img: "https://i.postimg.cc/3xKX0gXg/hei.png" },
+  { name: "星暮紫", color: "#a06eaa", img: "https://i.postimg.cc/QxggM6Tg/zi.png" },
+  { name: "星瀚绿", color: "#2F4F4F", img: "https://i.postimg.cc/6p9r4drS/lu.png" },
+  { name: "星芒蓝", color: "#7cb1e3", img: "https://i.postimg.cc/VkYq0jqZ/lan.png" },
+  { name: "星月银", color: "#C0C0C0", img: "https://i.postimg.cc/P52mWPy2/yin.png" },
+  { name: "律动黄", color: "#e7ed68", img: "https://i.postimg.cc/L8Htgzt1/huang.png" },
+];
+
+function ChapterOneDisplay() {
+  const [selectedColor, setSelectedColor] = useState(CAR_COLORS[0]);
+  
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 40 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 1.8, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute left-[58vw] right-[5vw] top-[52.5%] -translate-y-1/2 w-[clamp(520px,34vw,680px)] z-50 flex flex-col items-center pointer-events-auto"
+    >
+      {/* Background Atmosphere Image Layer */}
+      <div className="absolute inset-0 -z-10 pointer-events-none overflow-visible flex items-center justify-end">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={`bg-${selectedColor.img}`}
+            src={selectedColor.img}
+            initial={{ opacity: 0, scale: 1.8, x: 50 }}
+            animate={{ opacity: 0.1, scale: 2, x: 0 }}
+            exit={{ opacity: 0, scale: 2.2, x: -50 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full h-full object-contain origin-right translate-x-[20%] -translate-y-[12%]"
+            referrerPolicy="no-referrer"
+          />
+        </AnimatePresence>
+      </div>
+
+      <div className="w-[115%] aspect-[16/9] relative mb-2 flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={selectedColor.img}
+            src={selectedColor.img}
+            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            referrerPolicy="no-referrer"
+          />
+        </AnimatePresence>
+      </div>
+      
+      <div className="flex items-center justify-center gap-8 -translate-y-2">
+        {CAR_COLORS.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => setSelectedColor(item)}
+            className="group relative flex flex-col items-center"
+          >
+            <motion.div 
+              animate={selectedColor.name === item.name ? {
+                boxShadow: [
+                  "0 0 0px rgba(255,255,255,0)", 
+                  "0 0 25px rgba(255,255,255,0.4)", 
+                  "0 0 0px rgba(255,255,255,0)"
+                ]
+              } : {}}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className={`w-7 h-7 rounded-full border-2 transition-all duration-500 relative ${
+                selectedColor.name === item.name 
+                ? 'border-white scale-110' 
+                : 'border-transparent hover:border-white/40 hover:scale-110'
+              }`}
+              style={{ backgroundColor: item.color }}
+            >
+              {selectedColor.name === item.name && (
+                <motion.div 
+                  layoutId="active-ring"
+                  className="absolute -inset-1.5 border border-white/40 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+            </motion.div>
+            <span className={`text-[8px] tracking-[0.2em] absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap uppercase font-bold ${selectedColor.name === item.name ? 'opacity-100 text-white' : 'text-white/40'}`}>
+              {item.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 // --- Prologue Overlay Component ---
 
 // --- Types ---
 type PrologueState = 'active' | 'video' | 'entering' | 'entered' | 'returning';
+
+/**
+ * ScrollProxy: Exposes the scroll object to the parent App component
+ */
+function ScrollProxy({ onReady }: { onReady: (scroll: any) => void }) {
+  const scroll = useScroll();
+  useEffect(() => {
+    onReady(scroll);
+  }, [scroll, onReady]);
+  return null;
+}
 
 /**
  * ScrollManager: Handles programmatic scrolling between sections
@@ -921,6 +1036,20 @@ const PrologueOverlay = ({
 export default function App() {
   const [prologueState, setPrologueState] = useState<PrologueState>('active');
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<any>(null);
+
+  const handleScrollTo = (index: number) => {
+    if (scrollRef.current) {
+      const el = scrollRef.current.el;
+      const targetOffset = (index - 1) * 0.5;
+      const targetScroll = targetOffset * (el.scrollHeight - el.clientHeight);
+      
+      el.scrollTo({
+        top: targetScroll,
+        behavior: 'auto'
+      });
+    }
+  };
 
   return (
     <div className="h-screen w-full bg-[#050505] text-white overflow-hidden font-sans">
@@ -928,6 +1057,7 @@ export default function App() {
         prologueState={prologueState} 
         activeIndex={activeIndex} 
         onReturn={() => setPrologueState('returning')}
+        onScrollTo={handleScrollTo}
       />
       
       <AnimatePresence mode="wait">
@@ -954,6 +1084,7 @@ export default function App() {
       <Canvas shadows dpr={[1, 2]}>
         <Suspense fallback={null}>
           <ScrollControls pages={3} damping={0.2}>
+            <ScrollProxy onReady={(scroll) => { scrollRef.current = scroll; }} />
             <Scene />
             <ScrollManager 
               state={prologueState} 
@@ -974,6 +1105,7 @@ export default function App() {
                 title="先看见一台车的 <br /> 想象力"
                 subtitle="它不仅承载移动，更承载品牌、审美与下一代体验的起点。通过极致的设计语言，我们重新定义了智能出行的视觉边界。"
                 description=""
+                rightContent={<ChapterOneDisplay />}
               />
 
               {/* Chapter 2 */}
