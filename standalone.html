@@ -240,15 +240,34 @@
 
         const rootElement = document.getElementById('root');
         
-        // Use a property on the element to store the root instance
-        let root = rootElement._reactRoot;
+        // 1. Try to find an existing root in global property
+        let root = window._reactRoot;
 
-        if (!root) {
+        // 2. If we don't have the root object, but the element looks like it's already a React root,
+        // we MUST replace the element to clear React's internal state, otherwise createRoot will warn/fail.
+        const hasReactContainer = 
+            Object.getOwnPropertyNames(rootElement).some(prop => prop.startsWith('__reactContainer')) ||
+            Object.getOwnPropertySymbols(rootElement).some(sym => sym.toString().includes('__reactContainer'));
+        
+        if (hasReactContainer && !root) {
+            try {
+                const newRootElement = rootElement.cloneNode(false);
+                rootElement.parentNode.replaceChild(newRootElement, rootElement);
+                root = createRoot(newRootElement);
+                window._reactRoot = root;
+            } catch (e) {
+                console.error('Failed to reset React root element in standalone mode:', e);
+            }
+        } else if (!root) {
             try {
                 root = createRoot(rootElement);
-                rootElement._reactRoot = root;
+                window._reactRoot = root;
             } catch (e) {
-                console.warn('Failed to create React root in standalone mode:', e);
+                console.warn('createRoot failed in standalone mode, attempting emergency reset:', e);
+                const newRootElement = rootElement.cloneNode(false);
+                rootElement.parentNode.replaceChild(newRootElement, rootElement);
+                root = createRoot(newRootElement);
+                window._reactRoot = root;
             }
         }
 

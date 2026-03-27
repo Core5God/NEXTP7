@@ -13,12 +13,18 @@ import {
   Points,
   PointMaterial
 } from "@react-three/drei";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionTemplate, useSpring } from "motion/react";
 import { 
   Menu, 
   X, 
   ChevronRight, 
   MousePointer2, 
+  Cpu,
+  Zap,
+  Shield,
+  Eye,
+  Layers,
+  Activity
 } from "lucide-react";
 import * as THREE from "three";
 
@@ -336,23 +342,24 @@ function SectionContent({ title, subtitle, description, index, children, rightCo
   } as const;
 
   const titleVariants = {
-    hidden: { y: "120%", opacity: 0, skewY: 7 },
+    hidden: { y: "120%", opacity: 0, skewY: 10, filter: "blur(10px)" },
     visible: { 
       y: 0, 
       opacity: 1,
       skewY: 0,
-      transition: { duration: 1.8, ease: [0.16, 1, 0.3, 1] }
+      filter: "blur(0px)",
+      transition: { duration: 2, ease: [0.16, 1, 0.3, 1] }
     }
   } as const;
 
   const subtitleVariants = {
-    hidden: { opacity: 0, x: -40, filter: "blur(20px)", scale: 0.98 },
+    hidden: { opacity: 0, x: -60, filter: "blur(30px)", scale: 0.95 },
     visible: { 
       opacity: 1, 
       x: 0, 
       filter: "blur(0px)",
       scale: 1,
-      transition: { duration: 1.5, ease: [0.22, 1, 0.36, 1] }
+      transition: { duration: 1.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }
     }
   } as const;
 
@@ -362,7 +369,7 @@ function SectionContent({ title, subtitle, description, index, children, rightCo
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ margin: "-10%", once: true }}
+        viewport={{ margin: "-20%", once: false }}
         className="z-10"
       >
         {/* Micro Label - Red English Text */}
@@ -447,11 +454,11 @@ function ChapterOneDisplay() {
   
   return (
     <motion.div 
-      initial={{ opacity: 0, x: 40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: 1.8, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute left-[58vw] right-[5vw] top-[52.5%] -translate-y-1/2 w-[clamp(520px,34vw,680px)] z-50 flex flex-col items-center pointer-events-auto"
+      initial={{ opacity: 0, x: 40, filter: "blur(10px)" }}
+      whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      viewport={{ once: false, margin: "-10%" }}
+      transition={{ delay: 0.8, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute left-[55vw] right-[5vw] top-[50.5%] -translate-y-1/2 w-[clamp(520px,34vw,680px)] z-50 flex flex-col items-center pointer-events-auto"
     >
       {/* Background Atmosphere Image Layer */}
       <div className="absolute inset-0 -z-10 pointer-events-none overflow-visible flex items-center justify-end">
@@ -520,6 +527,256 @@ function ChapterOneDisplay() {
             </span>
           </button>
         ))}
+      </div>
+    </motion.div>
+  );
+}
+
+const TECH_CARDS = [
+  {
+    title: "端到端大模型",
+    label: "MODEL X-LINK",
+    icon: Cpu,
+    img: "https://i.postimg.cc/VLRJqCgn/1.png",
+    desc: "基于神经网络的决策系统，实现类人驾驶逻辑。"
+  },
+  {
+    title: "多重感知融合",
+    label: "SENSOR FUSION",
+    icon: Eye,
+    img: "https://i.postimg.cc/dtBh2y6C/2.png",
+    desc: "激光雷达与视觉方案深度协同，360度无死角覆盖。"
+  },
+  {
+    title: "实时路径规划",
+    label: "PATH PLANNER",
+    icon: Activity,
+    img: "https://i.postimg.cc/JzzGPzYn/3.png",
+    desc: "毫秒级响应，动态应对复杂城市路况。"
+  },
+  {
+    title: "AI云端图层",
+    label: "AI CLOUD LAYER",
+    icon: Layers,
+    img: "https://i.postimg.cc/kggBfgYG/4.png",
+    desc: "云端实时渲染与数据同步，构建高精度数字孪生。"
+  }
+];
+
+function ChapterTwoDisplay() {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 60, filter: "blur(20px)" }}
+      whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      viewport={{ once: false, margin: "-10%" }}
+      transition={{ delay: 0.8, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute left-[55vw] right-[5vw] top-[50.5%] -translate-y-1/2 w-[clamp(520px,36vw,720px)] z-50 pointer-events-auto"
+    >
+      <div className="flex flex-col gap-12">
+        {/* Header with tech line */}
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-mono text-red-600 tracking-[0.4em] uppercase mb-1">System Module</span>
+            <span className="text-xl font-black tracking-tighter uppercase text-white">X-PILOT CORE</span>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-red-600/50 to-transparent" />
+        </div>
+
+        {/* Sliding Cards Container */}
+        <div className="grid grid-cols-2 gap-6">
+          {TECH_CARDS.map((card, idx) => (
+            <motion.div
+              key={card.label}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: false }}
+              transition={{ delay: 1 + idx * 0.15, duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="group relative aspect-[4/3] bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-red-600/50 transition-all duration-700"
+            >
+              {/* Image Layer */}
+              <div className="absolute inset-0 opacity-40 group-hover:opacity-70 transition-opacity duration-700">
+                <img 
+                  src={card.img} 
+                  alt={card.title} 
+                  className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              </div>
+
+              {/* Content Layer */}
+              <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-red-600/10 border border-red-600/20 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-all duration-500">
+                    <card.icon className="w-4 h-4" />
+                  </div>
+                  <span className="text-[8px] font-mono text-white/40 tracking-widest uppercase">{card.label}</span>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-1">{card.title}</h3>
+                <p className="text-[9px] text-white/40 leading-relaxed max-w-[80%] opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700">
+                  {card.desc}
+                </p>
+              </div>
+
+              {/* Light Effects */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Scanning Line */}
+                <motion.div 
+                  animate={{ top: ["-100%", "200%"] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="absolute left-0 right-0 h-20 bg-gradient-to-b from-transparent via-red-600/10 to-transparent opacity-0 group-hover:opacity-100"
+                />
+                {/* Corner Accents */}
+                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-600/0 group-hover:border-red-600/50 transition-all duration-500" />
+                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-600/0 group-hover:border-red-600/50 transition-all duration-500" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Footer Stats */}
+        <div className="flex gap-12 pt-4 border-t border-white/5">
+          <div className="flex flex-col gap-1">
+            <span className="text-[7px] text-white/20 uppercase tracking-[0.4em]">计算能力</span>
+            <span className="text-sm font-mono text-white/80 tracking-widest">508 TOPS</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[7px] text-white/20 uppercase tracking-[0.4em]">传感器数量</span>
+            <span className="text-sm font-mono text-white/80 tracking-widest">31 SENSORS</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[7px] text-white/20 uppercase tracking-[0.4em]">更新频率</span>
+            <span className="text-sm font-mono text-white/80 tracking-widest">1000 HZ</span>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function ChapterThreeDisplay() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const springConfig = { damping: 25, stiffness: 150 };
+  const mouseX = useSpring(0, springConfig);
+  const mouseY = useSpring(0, springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    mouseX.set(x);
+    mouseY.set(y);
+    setMousePos({ x, y });
+  };
+
+  const maskImage = useMotionTemplate`radial-gradient(circle 200px at ${mouseX}px ${mouseY}px, black 0%, black 120px, transparent 240px)`;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 60, filter: "blur(20px)" }}
+      whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      viewport={{ once: false, margin: "-10%" }}
+      transition={{ delay: 0.8, duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+      className="absolute left-[58vw] right-[5vw] top-[50%] -translate-y-1/2 w-[clamp(520px,34vw,700px)] z-50 pointer-events-auto"
+    >
+      <div className="flex flex-col gap-8">
+        {/* Header */}
+        <div className="flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-mono text-cyan-400 tracking-[0.4em] uppercase mb-1">Visual Intelligence</span>
+            <span className="text-xl font-black tracking-tighter uppercase text-white">Digital Twin Core</span>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-cyan-400/50 to-transparent" />
+        </div>
+
+        {/* Interactive Image Container */}
+        <div 
+          ref={containerRef}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+          className="relative aspect-[16/10] bg-white/5 border border-white/10 rounded-2xl overflow-hidden cursor-none group"
+        >
+          {/* Layer 1: Foreground (Default) */}
+          <div className="absolute inset-0">
+            <img 
+              src="https://i.postimg.cc/vmd9Xs9m/shang-se-ban.jpg" 
+              alt="Foreground" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+            {/* Subtle Overlay to match theme */}
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+
+          {/* Layer 2: Background (Revealed via Mask) */}
+          <motion.div 
+            className="absolute inset-0 z-10"
+            style={{ 
+              maskImage: maskImage,
+              WebkitMaskImage: maskImage,
+              opacity: isHovering ? 1 : 0
+            }}
+            transition={{ opacity: { duration: 0.4 } }}
+          >
+            <img 
+              src="https://i.postimg.cc/8CVWwSWz/zhu-tukv.png" 
+              alt="Background" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </motion.div>
+
+          {/* Custom Cursor / Aperture Ring */}
+          <motion.div
+            className="absolute top-0 left-0 w-[400px] h-[400px] border border-cyan-400/30 rounded-full pointer-events-none z-20"
+            style={{
+              x: mouseX,
+              y: mouseY,
+              translateX: "-50%",
+              translateY: "-50%",
+              opacity: isHovering ? 1 : 0,
+              scale: isHovering ? 1 : 0.5,
+            }}
+          >
+            <div className="absolute inset-0 rounded-full bg-cyan-400/5 blur-xl" />
+            {/* Crosshair */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-[1px] bg-cyan-400/40" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-8 bg-cyan-400/40" />
+          </motion.div>
+
+          {/* Decorative Corners */}
+          <div className="absolute top-4 left-4 w-4 h-4 border-t border-l border-white/20" />
+          <div className="absolute top-4 right-4 w-4 h-4 border-t border-r border-white/20" />
+          <div className="absolute bottom-4 left-4 w-4 h-4 border-b border-l border-white/20" />
+          <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r border-white/20" />
+
+          {/* Interaction Hint */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+            <span className="text-[8px] font-mono text-white/60 tracking-widest uppercase">Move mouse to explore digital twin</span>
+          </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="flex justify-between items-end">
+          <div className="flex gap-10">
+            <div className="flex flex-col gap-1">
+              <span className="text-[7px] text-white/20 uppercase tracking-[0.4em]">渲染引擎</span>
+              <span className="text-xs font-mono text-white/60 tracking-widest uppercase">Unreal Engine 5</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-[7px] text-white/20 uppercase tracking-[0.4em]">同步延迟</span>
+              <span className="text-xs font-mono text-white/60 tracking-widest uppercase">&lt; 15ms</span>
+            </div>
+          </div>
+          <div className="text-[9px] text-white/20 font-mono tracking-tighter italic">
+            Visualizing the unseen dimensions of mobility.
+          </div>
+        </div>
       </div>
     </motion.div>
   );
@@ -1114,6 +1371,7 @@ export default function App() {
                 title="每一次前行，<br /> 都经过思考"
                 subtitle="在感知与判断之间，智能驾驶把复杂世界转化为从容行动。基于端到端大模型，实现全场景、全天候的自动驾驶体验。"
                 description=""
+                rightContent={<ChapterTwoDisplay />}
               />
 
               {/* Chapter 3 */}
@@ -1122,6 +1380,7 @@ export default function App() {
                 title="把未来带到 <br /> 现实之前"
                 subtitle="飞行汽车与机器人，正在让想象逐步拥有真实形态。我们不断探索人类移动的终极形态，打破维度与空间的限制。"
                 description=""
+                rightContent={<ChapterThreeDisplay />}
               />
 
               {/* Micro-interaction End Section */}
